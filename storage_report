@@ -309,16 +309,16 @@ function get_block_device_smart_attributes {
     fi
   else
     if [[ ${2} == *"PREFAIL"* ]]; then
-      attributes=("${smart_prefail_long_headers[@]}")
+      attributes=("${smart_prefail_ids[@]}")
     else
-      attributes=("${smart_oldage_long_headers[@]}")
+      attributes=("${smart_oldage_ids[@]}")
     fi
 
     attr_status=""
-    for attr in "${attributes[@]}"; do
+    for attr_id in "${attributes[@]}"; do
       smart_diff="---"
-      smart_value=$(echo -e "${device_smart_attributes[${1}]}" | grep $(printf '%s' ${attr} | sed -E 's/^[[:digit:]]+_//') | awk -F ' ' '{print $4}')
-      smart_thresh=$(echo -e "${device_smart_attributes[${1}]}" | grep $(printf '%s' ${attr} | sed -E 's/^[[:digit:]]+_//') | awk -F ' ' '{print $6}')
+      smart_value=$(echo -e "${device_smart_attributes[${1}]}" | grep -E $(printf '^%s' ${attr_id} | sed -E 's/^[[:digit:]]+_//') | awk -F ' ' '{print $4}')
+      smart_thresh=$(echo -e "${device_smart_attributes[${1}]}" | grep -E $(printf '^%s' ${attr_id} | sed -E 's/^[[:digit:]]+_//') | awk -F ' ' '{print $6}')
       if [[ $smart_value != "" ]]; then
         smart_diff="$(bc <<< "${smart_value}-${smart_thresh}")"
       fi
