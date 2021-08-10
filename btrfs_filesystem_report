@@ -13,18 +13,17 @@ but will see "[sudo]" in the output where priviledges are required.
 '
 
 # get paths
-paths=( `df -T | grep btrfs | grep -v "/var/lib" | sed -E "s/.*% //" | tr '\n' ' '` )
+paths=($(df -T | grep btrfs | grep -v "/var/lib" | sed -E "s/.*% //" | tr '\n' ' '))
 
 scrub_report="BTRFS_PATH SIZE AVAIL USE% SCB ERR"$'\n'
-for path in "${paths[@]}"
-do
-	if [[ $EUID -ne 0 ]]; then
-		last_scrub_days="[sudo]"
-		summary="[sudo]"
-	else
-		last_scrub_days="$(( ($(date +%s) - $(date --date="$(btrfs scrub status ${path} | grep "started" | sed -E "s/Scrub started: *//")" +%s) )/(60*60*24) ))"
-		summary="$([[ $(btrfs scrub status ${path} | grep "summary") == *"no errors found"* ]] && echo -n "." || echo -n "x" )"
-	fi
+for path in "${paths[@]}"; do
+  if [[ $EUID -ne 0 ]]; then
+    last_scrub_days="[sudo]"
+    summary="[sudo]"
+  else
+    last_scrub_days="$((($(date +%s) - $(date --date="$(btrfs scrub status ${path} | grep "started" | sed -E "s/Scrub started: *//")" +%s)) / (60 * 60 * 24)))"
+    summary="$([[ $(btrfs scrub status ${path} | grep "summary") == *"no errors found"* ]] && echo -n "." || echo -n "x")"
+  fi
   df="$(\df -h -t btrfs --output=size,avail,pcent ${path} | tail -n1)"
   scrub_report="${scrub_report}${path} ${df} ${last_scrub_days} ${summary}"$'\n'
 done
