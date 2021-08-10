@@ -68,9 +68,9 @@ function usage {
 
   echo "Formatting"
   echo "-x, --tall      Displays results with devices on the x-axis, which"
-  echo "                tends to produce a taller result."
-  echo "-y, --wide      Displays results with devices on the y-axis, which"
   echo "                tends to produce a wider result. Default."
+  echo "-y, --wide      Displays results with devices on the y-axis, which"
+  echo "                tends to produce a taller result."
   echo
 
   echo "Documentation"
