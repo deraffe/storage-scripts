@@ -204,7 +204,7 @@ function get_block_device_path {
   if [[ " ${headers_to_show[@]} " =~ " PATH " ]]; then
     raw_path=""
     if [[ -d "/dev/disk/by-path" ]] && find -L "/dev/disk/by-path/" -samefile "/dev/${1}" > "/dev/null"; then
-      raw_path="$(find -L /dev/disk/by-path/ -samefile /dev/${1} | sed -E "s/.*\///")"
+      raw_path="$(find -L /dev/disk/by-path/ -samefile /dev/${1} | sed -E "s/.*\///" | awk '{if(NR==1){print}}')"
     else
       raw_path="$(readlink --canonicalize /sys/block/${1})"
     fi
