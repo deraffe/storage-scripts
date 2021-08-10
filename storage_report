@@ -139,6 +139,11 @@ fi
 
 # Function definitions =======================================================
 
+# Fix for locales with different number format
+function printf {
+  LC_ALL=C command printf "$@"
+}
+
 # Returns an error (1) if one of the required dependencies isn't available
 function check_dependencies {
   retval=0
