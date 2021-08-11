@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+: '
+Author: Mark McBride <mark@markmcb.com>
+Source: https://github.com/markmcb/storage-scripts
+
+Description: This script runs locally and to all servers listed and runs all of the
+storage scripts, collects their outputs, and prints it.
+
+IMPORTANT: This script does require root priviledges.
+'
+
+get_script_dir() {
+  # https://stackoverflow.com/a/246128
+  local SOURCE DIR
+  SOURCE="${BASH_SOURCE[0]}"
+  while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$(cd -P "$(dirname "$SOURCE")" > /dev/null 2>&1 && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  done
+  DIR="$(cd -P "$(dirname "$SOURCE")" > /dev/null 2>&1 && pwd)"
+  echo "$DIR"
+}
+
+# Local server, i.e., the one you're running the script on
+LOCAL_SCRIPT_INSTALLATION_DIR="$(get_script_dir)"
+STORAGE_REPORT_ARGS="-y -d -C -f -o -a -l -t -p --pathsubst '/.*phy([[:digit:]]+).*/\1/'"
+email_report="$(printf '%s' ${HOSTNAME} | sed -E 's/\..*//') $(uptime | sed -E 's/.*(up[^,]*),.*/\1/' | sed -E 's/ +/ /') on $(uname -r)"$'\n\n'
+email_report+="$(eval "sudo ${LOCAL_SCRIPT_INSTALLATION_DIR}/storage_report ${STORAGE_REPORT_ARGS}")"$'\n\n'
+email_report+="$(sudo ${LOCAL_SCRIPT_INSTALLATION_DIR}/btrfs_filesystem_report)"$'\n\n'
+email_report+="$(sudo ${LOCAL_SCRIPT_INSTALLATION_DIR}/btrfs_device_report)"$'\n'
+
+printf "%s" "$email_report"
